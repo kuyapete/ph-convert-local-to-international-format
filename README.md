@@ -8,6 +8,7 @@ A Python script designed to convert local Philippine phone numbers to internatio
 - **Excel File Processing**: Handles large datasets (up to 224,680 rows)
 - **Smart Format Detection**: Automatically detects and converts different local formats
 - **Philippine Number Validation**: Filters out non-Philippine and invalid phone numbers
+- **Duplicate Removal**: Automatically removes duplicate phone numbers
 - **Data Cleanup**: Removes empty rows and non-digit characters
 - **Batch Processing**: Processes entire Excel files in one operation
 - **Safe Processing**: Uses new worksheet approach to avoid file corruption
@@ -77,8 +78,10 @@ The script will:
 
 ```
 Processing complete!
-Converted phone numbers to country code format (63 prefix)
-Deleted 15 empty rows
+Converted 1,250 unique Philippine phone numbers to international format
+Skipped 45 empty rows
+Filtered out 23 invalid/non-Philippine numbers
+Removed 67 duplicate phone numbers
 File saved as: your_file.xlsx
 ```
 

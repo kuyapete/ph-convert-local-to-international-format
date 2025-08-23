@@ -29,6 +29,9 @@ def convert_phone_numbers(file_path, output_path=None):
     invalid_numbers = 0
     new_row = 2  # Start from row 2 in new sheet
     
+    # Set to track unique phone numbers and avoid duplicates
+    unique_phone_numbers = set()
+    
     # Process rows from 2 to 224680
     for row in range(2, 224681):  # 224681 because range is exclusive of the end
         cell = ws[f'A{row}']
@@ -55,10 +58,17 @@ def convert_phone_numbers(file_path, output_path=None):
         # Validate Philippine phone number format
         # PH numbers should be exactly 12 digits starting with 63
         if phone_number.startswith('63') and len(phone_number) == 12:
-            # Add to new worksheet
-            new_ws[f'A{new_row}'] = phone_number
-            new_row += 1
-            processed_rows += 1
+            # Check if this is a duplicate phone number
+            if phone_number not in unique_phone_numbers:
+                # Add to new worksheet
+                new_ws[f'A{new_row}'] = phone_number
+                new_row += 1
+                processed_rows += 1
+                # Add to set to track uniqueness
+                unique_phone_numbers.add(phone_number)
+            else:
+                # Skip duplicate numbers
+                invalid_numbers += 1
         else:
             # Skip invalid numbers
             invalid_numbers += 1
@@ -73,10 +83,15 @@ def convert_phone_numbers(file_path, output_path=None):
     
     wb.save(output_path)
     
+    # Calculate duplicates removed
+    total_processed = processed_rows + invalid_numbers
+    duplicates_removed = total_processed - len(unique_phone_numbers)
+    
     print(f"Processing complete!")
-    print(f"Converted {processed_rows} valid Philippine phone numbers to international format")
+    print(f"Converted {processed_rows} unique Philippine phone numbers to international format")
     print(f"Skipped {empty_rows} empty rows")
     print(f"Filtered out {invalid_numbers} invalid/non-Philippine numbers")
+    print(f"Removed {duplicates_removed} duplicate phone numbers")
     print(f"File saved as: {output_path}")
 
 # Example usage
