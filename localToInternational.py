@@ -2,10 +2,30 @@ import pandas as pd
 import openpyxl
 from openpyxl import load_workbook
 
+def is_valid_philippine_number(phone_number):
+    """
+    Check if the phone number is a valid Philippine number format.
+    Valid formats: starts with 639, 09, or 9
+    
+    Args:
+        phone_number (str): The phone number to validate
+        
+    Returns:
+        bool: True if valid Philippine format, False otherwise
+    """
+    # Remove any non-digit characters
+    clean_number = ''.join(filter(str.isdigit, phone_number))
+    
+    # Check if it starts with valid Philippine prefixes
+    return (clean_number.startswith('639') or 
+            clean_number.startswith('09') or 
+            clean_number.startswith('9'))
+
 def convert_phone_numbers(file_path, output_path=None):
     """
     Convert mobile numbers in Excel file to country code format (63 prefix)
     and create a clean output without empty rows.
+    Only processes numbers that start with 639, 09, or 9.
     
     Args:
         file_path (str): Path to the input Excel file
@@ -27,6 +47,7 @@ def convert_phone_numbers(file_path, output_path=None):
     processed_rows = 0
     empty_rows = 0
     invalid_numbers = 0
+    non_philippine_numbers = 0  # New counter for numbers that don't match Philippine format
     new_row = 2  # Start from row 2 in new sheet
     
     # Set to track unique phone numbers and avoid duplicates
@@ -41,14 +62,22 @@ def convert_phone_numbers(file_path, output_path=None):
             empty_rows += 1
             continue
         
-        # Convert the phone number
+        # Get the phone number as string
         phone_number = str(cell.value).strip()
+        
+        # First check: Validate if it's a Philippine number format
+        if not is_valid_philippine_number(phone_number):
+            non_philippine_numbers += 1
+            continue  # Skip this number entirely
         
         # Remove any non-digit characters (in case there are spaces or dashes)
         phone_number = ''.join(filter(str.isdigit, phone_number))
         
         # Convert local phone numbers to international format
-        if phone_number.startswith('9'):
+        if phone_number.startswith('639'):
+            # Already in international format, keep as is
+            pass
+        elif phone_number.startswith('9'):
             # If starts with 9, add 63 prefix
             phone_number = '63' + phone_number
         elif phone_number.startswith('0'):
@@ -90,22 +119,23 @@ def convert_phone_numbers(file_path, output_path=None):
     print(f"Processing complete!")
     print(f"Converted {processed_rows} unique Philippine phone numbers to international format")
     print(f"Skipped {empty_rows} empty rows")
-    print(f"Filtered out {invalid_numbers} invalid/non-Philippine numbers")
+    print(f"Filtered out {non_philippine_numbers} non-Philippine number formats")
+    print(f"Filtered out {invalid_numbers} invalid/duplicate numbers")
     print(f"Removed {duplicates_removed} duplicate phone numbers")
     print(f"File saved as: {output_path}")
 
 # Example usage
 if __name__ == "__main__":
     # Replace 'your_file.xlsx' with the actual path to your Excel file
-    input_file = "PBET.xlsx"  # Change this to your file path
+    input_file = "royalebet.xlsx"  # Change this to your file path
     output_file = "converted_phone_numbers.xlsx"  # Optional: specify output file name
     
     try:
         # Option 1: Overwrite the original file
-        convert_phone_numbers(input_file)
+        # convert_phone_numbers(input_file)
         
         # Option 2: Save to a new file (uncomment the line below)
-        # convert_phone_numbers(input_file, output_file)
+        convert_phone_numbers(input_file, output_file)
         
     except FileNotFoundError:
         print(f"Error: File '{input_file}' not found. Please check the file path.")
